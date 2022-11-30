@@ -1,15 +1,11 @@
-.main {
-  margin: 0 auto;
-  display: grid;
+.board {
   width: 400px;
-  height: 400px;
-  grid: repeat(3, 1fr) / repeat(3, 1fr);
-  border: 1px solid black;
 }
 
 .box {
   border: 1px solid black;
-  font-size: 100px;
-  text-align: center;
-  padding: 7px;
+  height: 123px;
+  font-size: 79px;
+  margin: 5px;
+  border-radius: 18px;
 }
