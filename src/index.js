@@ -24,22 +24,32 @@ const player1 = player("Player 1", "X");
 const player2 = player("Player 2", "O");
 
 const fieldsInfo = (() => {
+  let nextRoundButton = document.createElement("button");
+  nextRoundButton.classList.add("btn", "btn-secondary");
+  nextRoundButton.textContent = "Next Round";
   let p1Score = document.querySelector("#p1-score");
   let p2Score = document.querySelector("#p2-score");
-  let message = document.querySelector(".message");
+  let messageDiv = document.querySelector("#message");
+  let messageBox = document.querySelector(".message");
 
   const updateFields = () => {
     p1Score.textContent = player1.viewWins();
     p2Score.textContent = player2.viewWins();
   };
 
-  return { updateFields };
+  const nextRound = () => {
+    messageBox.remove();
+    messageDiv.append(nextRoundButton);
+  };
+
+  nextRoundButton.addEventListener("click", gameBoard.runAgain);
+
+  return { nextRoundButton, updateFields, nextRound };
 })();
 
 const gameBoard = (() => {
-  const board = document.querySelectorAll(".box");
+  let board = document.querySelectorAll(".box");
   let turn = player1.marker;
-  const controller = new AbortController();
 
   const winConditions = [
     [0, 1, 2],
@@ -68,30 +78,25 @@ const gameBoard = (() => {
     board.forEach(x => (x.textContent = ""));
   };
 
-  const markBoard = x => {
+  const markBoard = ({ target }) => {
     if (turn === "X") {
-      x.textContent = "X";
+      target.textContent = "X";
       turn = player2.marker;
     } else {
-      x.textContent = "O";
+      target.textContent = "O";
       turn = player1.marker;
     }
-  };
-
-  const stopListening = () => {
-    board.forEach(x => {
-      controller.abort();
-    });
   };
 
   const playerWin = player => {
     player.wonRound();
     player.isWinner();
     stopListening();
+    fieldsInfo.nextRound();
   };
 
-  const handleBoardClick = x => {
-    markBoard(x);
+  const handleBoardClick = event => {
+    markBoard(event);
     let winner = checkWin(board);
     if (winner === "X") {
       playerWin(player1);
@@ -101,13 +106,17 @@ const gameBoard = (() => {
   };
 
   const startListening = x => {
-    x.addEventListener(
-      "click",
-      function handled() {
-        handleBoardClick(x);
-      },
-      { signal: controller.signal, once: true }
-    );
+    x.addEventListener("click", handleBoardClick, {
+      once: true,
+    });
+  };
+
+  const stopListening = () => {
+    board.forEach(x => {
+      x.removeEventListener("click", handleBoardClick, {
+        once: true,
+      });
+    });
   };
 
   const runBoard = () => {
@@ -116,5 +125,13 @@ const gameBoard = (() => {
     });
   };
 
+  const runAgain = () => {
+    resetGameBoard();
+    runBoard();
+    turn = player1.marker;
+  };
+
   runBoard();
+
+  return { runAgain };
 })();
