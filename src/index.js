@@ -55,14 +55,21 @@ const gameBoard = (() => {
   const checkWin = board => {
     // uses forOf loop with destucturing of each win condition
     // if one letter takes all three spaces then that letter is returned
-    for (let [a, b, c] of winConditions) {
-      if (
-        board[a].textContent &&
-        board[a].textContent === board[b].textContent &&
-        board[b].textContent === board[c].textContent
-      ) {
-        return board[a].textContent;
+
+    let boardArr = [];
+    board.forEach(x => boardArr.push(x.textContent));
+    if (boardArr.includes("")) {
+      for (let [a, b, c] of winConditions) {
+        if (
+          board[a].textContent &&
+          board[a].textContent === board[b].textContent &&
+          board[b].textContent === board[c].textContent
+        ) {
+          return board[a].textContent;
+        }
       }
+    } else {
+      fieldsInfo.tie();
     }
   };
 
@@ -148,7 +155,7 @@ const gameBoard = (() => {
 
   runBoard();
 
-  return { runAgain, turn };
+  return { runAgain, turn, board };
 })();
 
 const fieldsInfo = (() => {
@@ -164,6 +171,7 @@ const fieldsInfo = (() => {
   nextRoundButton.classList.add("btn", "btn-secondary");
   nextRoundButton.textContent = "Next Round";
   nextRoundButton.addEventListener("click", () => {
+    message.remove();
     gameBoard.runAgain();
     nextRoundButton.remove();
     message = document.createElement("h2");
@@ -191,6 +199,11 @@ const fieldsInfo = (() => {
     messageDiv.append(nextRoundButton);
   };
 
+  const tie = () => {
+    message.textContent = "Uh Oh! It's a tie!";
+    messageDiv.append(message, nextRoundButton);
+  };
+
   const gameOver = player => {
     // displays winner and displays playAgain button
     let winner = player.isWinner();
@@ -198,5 +211,5 @@ const fieldsInfo = (() => {
     messageDiv.append(playAgainButton);
   };
 
-  return { nextRoundButton, updateScore, nextRound, gameOver };
+  return { nextRoundButton, updateScore, nextRound, tie, gameOver };
 })();
